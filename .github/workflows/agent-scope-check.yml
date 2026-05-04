@@ -1,0 +1,27 @@
+name: Agent Scope Check
+
+# =============================================================================
+# Pilot caller for devops/agent-scope-check.yml.
+#
+# Runs ONLY on PRs from agents/* branches. Diffs the PR against origin/main
+# and enforces the AGENT_CAPABILITIES.md allow/deny globs and per-slice
+# limits (max_files=25, max_loc=800 in this repo).
+#
+# Produces a check named `agent-scope-check`. Required as a branch-protection
+# gate on `main` so agents cannot bypass via admin override.
+# =============================================================================
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  scope:
+    if: startsWith(github.head_ref, 'agents/')
+    uses: Anomalous-Ventures/devops/.github/workflows/agent-scope-check.yml@main
+    with:
+      base-ref: origin/main
+    secrets: inherit
