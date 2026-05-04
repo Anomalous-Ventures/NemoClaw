@@ -191,3 +191,14 @@ All hooks managed by [prek](https://prek.j178.dev/) (installed via `npm install`
 - Update docs for any user-facing behavior changes
 - No secrets, API keys, or credentials committed
 - Limit open PRs to fewer than 10
+
+## Agent-Authored PRs (`agents/` branch prefix)
+
+PRs from autonomous agents must use the `agents/<slice-name>` branch prefix. This triggers `agent-scope-check` (`.github/workflows/agent-scope-check.yml`), which enforces the scope contract in `AGENT_CAPABILITIES.md`.
+
+- **Allow / deny globs:** edits must touch only allow-listed paths and zero deny-listed paths. Lockfiles, install scripts, the upstream-bound `Dockerfile.base`, and the integrity-gate workflows (`base-image.yaml`, `installer-hash-check.yaml`, `legacy-path-guard.yaml`) are off-limits.
+- **Per-slice limits:** `max_files=25`, `max_loc=800`, `max_minutes=30`. Larger slices must be split or escalated to a human-authored branch.
+- **Conventional, lowercase, signed:** subject must be lowercase-leading (`commitlint` enforces `subject-case`); commits must carry `Signed-off-by:` (`-s`) AND the PR body must contain the same trailer (`dco-check` reads both).
+- **Pinned actions:** any workflow edits must use full-length commit SHAs (org policy). See the existing pinned refs in `dco-check.yaml` / `commit-lint.yaml` for the canonical pattern.
+
+Human-authored branches keep the existing `feat/`, `fix/`, `chore/` prefixes -- `agent-scope-check` runs only when `head_ref` starts with `agents/`.
