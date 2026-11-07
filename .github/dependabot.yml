@@ -1,11 +1,62 @@
+# Weekly dependency patches across all configured ecosystems.
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
-
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+- package-ecosystem: github-actions
+  commit-message:
+    prefix: chore(deps)
+  directory: /
+  multi-ecosystem-group: weekly-patches
+  patterns:
+  - '*'
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+- package-ecosystem: docker
+  directories:
+  - /
+  - /agents/hermes
+  - /test
+  - /test/e2e
+  multi-ecosystem-group: weekly-patches
+  patterns:
+  - '*'
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+- package-ecosystem: npm
+  directories:
+  - /
+  - /nemoclaw
+  - /test
+  multi-ecosystem-group: weekly-patches
+  patterns:
+  - '*'
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+- package-ecosystem: uv
+  directory: /
+  multi-ecosystem-group: weekly-patches
+  patterns:
+  - '*'
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+multi-ecosystem-groups:
+  weekly-patches:
     schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: "chore(deps)"
+      interval: weekly
+      day: monday
+      time: 09:00
+      timezone: America/Los_Angeles
+    open-pull-requests-limit: 1
