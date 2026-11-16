@@ -309,22 +309,35 @@ describe("CLI dispatch", () => {
     );
     const r = runWithEnv("debug --quick 2>&1", { HOME: home });
     expect(r.code).toBe(0);
-    expect(r.out).toContain("Warning");
+    expect(r.out).toContain("default sandbox 'ghost' is no longer in the registry.");
     expect(r.out).toContain("ghost");
     expect(r.out).toContain("--sandbox NAME");
   });
 
   it("debug --sandbox skips stale default warning", { timeout: 15000 }, () => {
     const home = fs.mkdtempSync(path.join(os.tmpdir(), "nemoclaw-cli-stale-"));
+    const diagnosticBin = path.join(home, "diagnostic-bin");
+    fs.mkdirSync(diagnosticBin);
+    for (const command of ["log", "dmesg"]) {
+      fs.writeFileSync(
+        path.join(diagnosticBin, command),
+        "#!/bin/sh\nprintf '%s\\n' 'SecWarning: unrelated kernel diagnostic'\n",
+        { mode: 0o755 },
+      );
+    }
     fs.mkdirSync(path.join(home, ".nemoclaw"), { recursive: true });
     fs.writeFileSync(
       path.join(home, ".nemoclaw", "sandboxes.json"),
       JSON.stringify({ sandboxes: {}, defaultSandbox: "ghost" }),
       { mode: 0o600 },
     );
-    const r = runWithEnv("debug --quick --sandbox mybox 2>&1", { HOME: home });
+    const r = runWithEnv("debug --quick --sandbox mybox 2>&1", {
+      HOME: home,
+      PATH: `${diagnosticBin}${path.delimiter}${process.env.PATH ?? ""}`,
+    });
     expect(r.code).toBe(0);
-    expect(r.out).not.toContain("Warning");
+    expect(r.out).not.toContain("default sandbox 'ghost' is no longer in the registry.");
+    expect(r.out).toContain("SecWarning: unrelated kernel diagnostic");
     expect(r.out).toContain("Collecting diagnostics for sandbox 'mybox'");
   });
 
